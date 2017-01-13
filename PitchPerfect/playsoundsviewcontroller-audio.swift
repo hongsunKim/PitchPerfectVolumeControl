@@ -27,6 +27,7 @@ extension PlaySoundsViewController : AVAudioPlayerDelegate{
         static let AudioEngineError = "Audio Engine Error"
     }
     
+    
     // MARK: PlayingState (raw values correspond to sender tags)
     
     enum PlayingState { case playing, notPlaying }
@@ -49,9 +50,6 @@ extension PlaySoundsViewController : AVAudioPlayerDelegate{
         
         // node for playing audio
         audioPlayerNode = AVAudioPlayerNode()
-        
-        //엔진에 붙이기 전에 볼륨을 설정하면 변화될까?
-        audioPlayerNode.volume = volume
         
         audioEngine.attach(audioPlayerNode)
         
@@ -78,13 +76,13 @@ extension PlaySoundsViewController : AVAudioPlayerDelegate{
         
         // connect nodes
         if echo == true && reverb == true {
-            connectAudioNodes(audioPlayerNode, changeRatePitchNode, echoNode, reverbNode, audioEngine.outputNode)
+            connectAudioNodes(audioPlayerNode, changeRatePitchNode, echoNode, reverbNode, audioEngine.mainMixerNode,audioEngine.outputNode)
         } else if echo == true {
-            connectAudioNodes(audioPlayerNode, changeRatePitchNode, echoNode, audioEngine.outputNode)
+            connectAudioNodes(audioPlayerNode, changeRatePitchNode, echoNode, audioEngine.mainMixerNode, audioEngine.outputNode)
         } else if reverb == true {
-            connectAudioNodes(audioPlayerNode, changeRatePitchNode, reverbNode, audioEngine.outputNode)
+            connectAudioNodes(audioPlayerNode, changeRatePitchNode, reverbNode, audioEngine.mainMixerNode, audioEngine.outputNode)
         } else {
-            connectAudioNodes(audioPlayerNode, changeRatePitchNode, audioEngine.outputNode)
+            connectAudioNodes(audioPlayerNode, changeRatePitchNode, audioEngine.mainMixerNode, audioEngine.outputNode)
         }
         
         // schedule to play and start the engine!
@@ -102,10 +100,21 @@ extension PlaySoundsViewController : AVAudioPlayerDelegate{
                 }
             }
             
+
             // schedule a stop timer for when audio finishes playing
             self.stopTimer = Timer(timeInterval: delayInSeconds, target: self, selector: #selector(PlaySoundsViewController.stopAudio), userInfo: nil, repeats: false)
             RunLoop.main.add(self.stopTimer!, forMode: RunLoopMode.defaultRunLoopMode)
+            
+            //self.stopTimer = Timer.scheduledTimer(timeInterval: delayInSeconds, target: self, selector: #selector(PlaySoundsViewController.stopAudio), userInfo: nil, repeats: false)
+            
+            self.timeLabelUpdateTimer = Timer.scheduledTimer(timeInterval: 0.01, target: self, selector: #selector(PlaySoundsViewController.timeLabelUpdate), userInfo: nil, repeats: true)
+            
         }
+        
+        
+        
+        print(audioFile.framePosition)
+        print(audioFile.length)
         
         do {
             try audioEngine.start()
@@ -119,8 +128,10 @@ extension PlaySoundsViewController : AVAudioPlayerDelegate{
          슬라이드 바로 얻은 볼륨의 값을 저장한다.
          그리고 플레이
         */
-        audioPlayerNode.volume = volume
-        print(audioPlayerNode.volume)
+        //audioPlayerNode.volume = volume
+        //print(audioPlayerNode.volume)
+        
+        audioEngine.mainMixerNode.outputVolume = volume
         
         // play the recording!
         audioPlayerNode.play()
@@ -141,6 +152,14 @@ extension PlaySoundsViewController : AVAudioPlayerDelegate{
         if let audioEngine = audioEngine {
             audioEngine.stop()
             audioEngine.reset()
+        }
+    }
+    
+    func timeLabelUpdate(){
+        testNum+=1
+        print(testNum)
+        if testNum == 100{
+            
         }
     }
     

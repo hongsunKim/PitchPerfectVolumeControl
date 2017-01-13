@@ -18,14 +18,18 @@ class PlaySoundsViewController: UIViewController {
     @IBOutlet weak var reverbButton: UIButton!
     @IBOutlet weak var stopButton: UIButton!
     @IBOutlet weak var slider: UISlider!
+    @IBOutlet weak var playTime: UILabel!
 
     var recordedAudioURL: URL!
     var audioFile: AVAudioFile!
     var audioEngine: AVAudioEngine!
     var audioPlayerNode: AVAudioPlayerNode!
     var stopTimer: Timer!
+    var timeLabelUpdateTimer: Timer!
     
     var volume: Float = 0.5
+    
+    var testNum = 0
 
     enum ButtonType: Int { case slow = 0, fast, chipmunk, vader, echo, reverb }
     
@@ -86,8 +90,10 @@ class PlaySoundsViewController: UIViewController {
         
         print(volume)
         
-        if nil != audioPlayerNode {
-            audioPlayerNode.volume = volume
+        if (audioEngine) != nil {
+            if audioEngine.isRunning{
+                audioEngine.mainMixerNode.outputVolume = volume
+            }
         }
     }
 }
