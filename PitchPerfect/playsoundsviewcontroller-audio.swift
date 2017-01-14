@@ -105,10 +105,6 @@ extension PlaySoundsViewController : AVAudioPlayerDelegate{
             self.stopTimer = Timer(timeInterval: delayInSeconds, target: self, selector: #selector(PlaySoundsViewController.stopAudio), userInfo: nil, repeats: false)
             RunLoop.main.add(self.stopTimer!, forMode: RunLoopMode.defaultRunLoopMode)
             
-            //self.stopTimer = Timer.scheduledTimer(timeInterval: delayInSeconds, target: self, selector: #selector(PlaySoundsViewController.stopAudio), userInfo: nil, repeats: false)
-            
-            self.timeLabelUpdateTimer = Timer.scheduledTimer(timeInterval: 0.01, target: self, selector: #selector(PlaySoundsViewController.timeLabelUpdate), userInfo: nil, repeats: true)
-            
         }
         
         
@@ -147,19 +143,13 @@ extension PlaySoundsViewController : AVAudioPlayerDelegate{
             stopTimer.invalidate()
         }
         
+        playTime.text = String("00:00")
+        
         configureUI(.notPlaying)
                         
         if let audioEngine = audioEngine {
             audioEngine.stop()
             audioEngine.reset()
-        }
-    }
-    
-    func timeLabelUpdate(){
-        testNum+=1
-        print(testNum)
-        if testNum == 100{
-            
         }
     }
     

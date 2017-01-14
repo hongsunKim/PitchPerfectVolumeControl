@@ -19,18 +19,18 @@ class PlaySoundsViewController: UIViewController {
     @IBOutlet weak var stopButton: UIButton!
     @IBOutlet weak var slider: UISlider!
     @IBOutlet weak var playTime: UILabel!
+    @IBOutlet weak var fullTime: UILabel!
+    @IBOutlet weak var timeSlide: UISlider!
 
     var recordedAudioURL: URL!
     var audioFile: AVAudioFile!
     var audioEngine: AVAudioEngine!
     var audioPlayerNode: AVAudioPlayerNode!
     var stopTimer: Timer!
-    var timeLabelUpdateTimer: Timer!
+    var playTimer: Timer!
     
     var volume: Float = 0.5
     
-    var testNum = 0
-
     enum ButtonType: Int { case slow = 0, fast, chipmunk, vader, echo, reverb }
     
     @IBAction func playSoundForButton(_ sender: UIButton) {
@@ -61,9 +61,6 @@ class PlaySoundsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupAudio()
-        if (audioFile != nil) {
-            
-        }
 
         // Do any additional setup after loading the view.
     }
@@ -71,7 +68,42 @@ class PlaySoundsViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         configureUI(.notPlaying)
+        playTimer = Timer.scheduledTimer(timeInterval: 0.01, target: self, selector: #selector(PlaySoundsViewController.timeUpdate), userInfo: nil, repeats: true)
         
+        if nil != audioFile {
+            let DoubleSeconds = (Double(audioFile.length) / audioFile.fileFormat.sampleRate)
+            let minutes = Int(DoubleSeconds) / 60
+            let seconds = Int(DoubleSeconds) - 60 * minutes
+            fullTime.text = String(format: "%02d:%02d", minutes, seconds)
+        }
+        
+        timeSlide.setValue(0, animated: true)
+        
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        playTimer.invalidate()
+    }
+    
+    func timeUpdate(){
+        if nil != audioPlayerNode {
+            //if audioPlayerNode.isPlaying {
+                let minutes = Int(currentTime(node: audioPlayerNode)) / 60
+                let seconds = Int(currentTime(node: audioPlayerNode) - (60*Double(minutes)))
+                playTime.text = String(format: "%02d:%02d", minutes, seconds)
+                let fullSeconds = Float(audioFile.length) / Float(audioFile.fileFormat.sampleRate)
+                let curSeconds = Float(currentTime(node: audioPlayerNode))
+                timeSlide.setValue(curSeconds/fullSeconds, animated: true)
+            //}
+        }
+                }
+    
+    func currentTime(node: AVAudioPlayerNode) -> TimeInterval {
+        if let nodeTime: AVAudioTime = node.lastRenderTime, let playerTime: AVAudioTime = node.playerTime(forNodeTime: nodeTime) {
+            return Double(Double(playerTime.sampleTime) / playerTime.sampleRate)
+        }
+        return 0
     }
     
     /*이 함수에서 슬라이드 바가 움직이면
