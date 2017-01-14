@@ -28,6 +28,7 @@ class PlaySoundsViewController: UIViewController {
     var audioPlayerNode: AVAudioPlayerNode!
     var stopTimer: Timer!
     var playTimer: Timer!
+    var tempString: String!
     
     var volume: Float = 0.5
     
@@ -52,8 +53,6 @@ class PlaySoundsViewController: UIViewController {
         configureUI(.playing)
     }
     
-    
-    
     @IBAction func stopButtonPressed(_ sender: AnyObject) {
         stopAudio()
     }
@@ -61,6 +60,7 @@ class PlaySoundsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupAudio()
+        print(tempString)
 
         // Do any additional setup after loading the view.
     }
@@ -78,7 +78,7 @@ class PlaySoundsViewController: UIViewController {
         }
         
         timeSlide.setValue(0, animated: true)
-        
+
     }
     
     override func viewWillDisappear(_ animated: Bool) {
